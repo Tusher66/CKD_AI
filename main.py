@@ -54,4 +54,12 @@ df = pd.read_csv("dataset/ckd.csv")
 
 print(df.head())
 
-print(df.columns)
+# print(df["Age"])
+
+print(df[["Age","SystolicBP"]])
+
+high_bp = df[df["SystolicBP"]>80]
+
+# print("high-bp",high_bp)
+
+print(df.isnull().sum())

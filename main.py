@@ -1,3 +1,6 @@
+import math
+import pandas as pd
+
 print("Hello Tusher CKD AI")
 
 name = "Tusher"
@@ -28,3 +31,27 @@ def bmi(h, w):
 
 result = bmi(height, weight)
 print("BMI:", round(result, 2))
+
+class Patient:
+
+    def __init__(self,name,age):
+        self.name = name
+        self.age = age
+
+    def show(self):
+        print(self.name)
+        print(self.age)
+
+
+
+p = Patient("Riyad",28)
+
+p.show()
+
+print(math.sqrt(25))
+
+df = pd.read_csv("dataset/ckd.csv")
+
+print(df.head())
+
+print(df.columns)

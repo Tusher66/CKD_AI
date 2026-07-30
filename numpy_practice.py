@@ -28,3 +28,11 @@ print("Shape:", patients.shape)
 
 matrix = patients.reshape(2,3)
 print(matrix)
+
+a = np.array([12,45,89])
+b = np.array([43,76,45])
+
+print(a+b)
+print(a-b)
+print(a*b)
+print(a/b)

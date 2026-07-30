@@ -63,3 +63,12 @@ high_bp = df[df["SystolicBP"]>80]
 # print("high-bp",high_bp)
 
 print(df.isnull().sum())
+
+high_bp.to_csv(
+    "high_bp_patients.csv",
+    index=False
+)
+
+df.fillna(0, inplace=True)
+
+df.drop(columns=["Edema"],inplace=True)

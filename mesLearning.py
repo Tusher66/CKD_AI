@@ -6,7 +6,15 @@ from sklearn.metrics import accuracy_score
 
 import pandas as pd
 
+from sklearn.pipeline import Pipeline
+
+from sklearn.metrics import accuracy_score
+
+from sklearn.preprocessing import StandardScaler
+
 df = pd.read_csv("dataset/patients.csv")
+
+df["BP"] = df["BP"].fillna(df["BP"].mean())
 
 print(df.head())
 
@@ -63,6 +71,30 @@ prediction = model.predict(
 
 print("klk",prediction)
 
-# for patient, pred in zip(new_patient, predictions):
-#     status = "High CKD Risk" if pred == 1 else "Low CKD Risk"
-#     print(f"Patient {patient}: {status}")
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
+print("X_scaled",X_scaled)
+
+pipeline = Pipeline([
+    ("scaler", StandardScaler()),
+    ("model", DecisionTreeClassifier())
+])
+
+pipeline.fit(
+    X_train,
+    y_train
+)
+
+prediction = pipeline.predict(
+    X_test
+)
+
+accuracy = accuracy_score(
+    y_test,
+    prediction
+)
+
+print("Accuracy:", accuracy * 100,"%")
+

@@ -122,8 +122,8 @@ plt.show()
 
 # Bar
 plt.bar(
-    df["Name"],
-    df["BP"]
+    df["PatientID"],
+    df["BMI"]
 )
 
 plt.title("Blood Pressure")

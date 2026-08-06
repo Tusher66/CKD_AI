@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import joblib
 from pydantic import BaseModel
 import pandas as pd
-from app.services.model_loader import model, scaler
+from app.core.model_loader import model, scaler
 
 
 app = FastAPI()

@@ -1,62 +1,20 @@
 from fastapi import FastAPI
-import joblib
-from pydantic import BaseModel
-import pandas as pd
-from app.core.model_loader import model, scaler
+
+from app.routes.health import router as health_router
+from app.routes.prediction import router as prediction_router
 
 
-app = FastAPI()
-
-@app.get("/")
-def home():
-
-    return {
-        "message":"Hello AI"
-    }
+app = FastAPI(
+    title="CKD Prediction API",
+    description="AI-based Chronic Kidney Disease Prediction API",
+    version="1.0.0"
+)
 
 
-# model = joblib.load("model/ckd_model.joblib")
+app.include_router(
+    health_router
+)
 
-# scaler = joblib.load("model/scaler.joblib")
-
-class Patient(
-    BaseModel
-):
-    Age:int
-    BP:int
-    Creatinine:float
-
-@app.post("/predict")
-def predict(
-predict:Patient
-):
-
-    data = pd.DataFrame({
-        "Age":[predict.Age],
-        "BP":[predict.BP],
-        "Creatinine":[predict.Creatinine]
-    })
-
-    # data = scaler.transform(
-    #     data
-    # )
-
-    # prediction = model.predict(
-    #     data
-    # )
-
-    data = scaler.transform(data)
-
-    prediction = model.predict(data)
-
-    return{
-        "Prediction":int(
-            prediction[0]
-        )
-    }
-    
-    # return {
-    #     "Age":predict.Age,
-    #     "BP":predict.BP,
-    #     "Creatinine":predict.Creatinine
-    # }
+app.include_router(
+    prediction_router
+)

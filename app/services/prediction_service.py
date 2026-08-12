@@ -1,22 +1,23 @@
 import pandas as pd
 
-from app.core.model_loader import (
-    model,
-    scaler
-)
-
 from app.schemas.patient import Patient
 
 
 def predict_patient(
-    patient: Patient
+    patient: Patient,
+    model,
+    scaler
 ):
 
     data = pd.DataFrame(
         {
-            "Age": [patient.Age],
+            "Age": [
+                patient.Age
+            ],
 
-            "BP": [patient.BP],
+            "BP": [
+                patient.BP
+            ],
 
             "Creatinine": [
                 patient.Creatinine
@@ -24,19 +25,24 @@ def predict_patient(
         }
     )
 
-    data_scaled = scaler.transform(
+
+    scaled_data = scaler.transform(
         data
     )
 
+
     prediction = model.predict(
-        data_scaled
+        scaled_data
     )
+
 
     probability = model.predict_proba(
-        data_scaled
+        scaled_data
     )
 
+
     return {
+
         "prediction": int(
             prediction[0]
         ),
@@ -48,4 +54,5 @@ def predict_patient(
         "model": "Random Forest",
 
         "version": "1.0.0"
+
     }

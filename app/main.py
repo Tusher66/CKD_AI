@@ -1,15 +1,17 @@
 from fastapi import FastAPI
 
+from app.core.config import settings
+
 from app.routes.health import router as health_router
 from app.routes.prediction import router as prediction_router
 
-
 app = FastAPI(
-    title="CKD Prediction API",
-    description="AI-based Chronic Kidney Disease Prediction API",
-    version="1.0.0"
-)
 
+    title=settings.APP_NAME,
+
+    version=settings.APP_VERSION
+
+)
 
 app.include_router(
     health_router

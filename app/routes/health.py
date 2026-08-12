@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from app.core.config import settings
+
 
 router = APIRouter(
     tags=["Health"]
@@ -18,13 +20,17 @@ def health():
 def model_info():
 
     return {
+
+        "application": settings.APP_NAME,
+
         "model": "Random Forest",
 
-        "version": "1.0.0",
+        "version": settings.APP_VERSION,
 
         "features": [
             "Age",
             "BP",
             "Creatinine"
         ]
+
     }

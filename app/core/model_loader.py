@@ -1,25 +1,21 @@
-# import joblib
-
-# model = joblib.load("model/ckd_model.joblib")
-# scaler = joblib.load("model/scaler.joblib")
-
 from pathlib import Path
 
 import joblib
 
+from app.core.config import settings
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+
 MODEL_PATH = (
     BASE_DIR
-    / "model"
-    / "ckd_model.joblib"
+    / settings.MODEL_PATH
 )
 
 SCALER_PATH = (
     BASE_DIR
-    / "model"
-    / "scaler.joblib"
+    / settings.SCALER_PATH
 )
 
 

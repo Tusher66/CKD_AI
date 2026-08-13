@@ -18,7 +18,8 @@ from fastapi.responses import (
 
 from app.core.dependencies import (
     get_model,
-    get_scaler
+    get_scaler,
+    get_current_user
 )
 
 from app.schemas.patient import (
@@ -63,6 +64,10 @@ def predict(
 
     scaler=Depends(
         get_scaler
+    ),
+
+    current_user=Depends(
+        get_current_user
     )
 
 ):
@@ -127,6 +132,10 @@ async def predict_csv(
 
     scaler=Depends(
         get_scaler
+    ),
+    
+    current_user=Depends(
+        get_current_user
     )
 
 ):

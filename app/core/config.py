@@ -17,9 +17,14 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    DATABASE_URL: str
+
+
     class Config:
 
         env_file = ".env"
+
+        extra = "ignore"
 
 
 settings = Settings()

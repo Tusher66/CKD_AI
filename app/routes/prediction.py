@@ -72,47 +72,17 @@ def predict(
 
 ):
 
-    try:
+    result = predict_patient(
 
-        logger.info(
-            "Single prediction started"
-        )
+        patient,
 
+        model,
 
-        result = predict_patient(
+        scaler
 
-            patient,
+    )
 
-            model,
-
-            scaler
-
-        )
-
-
-        logger.info(
-            "Single prediction completed"
-        )
-
-
-        return result
-
-
-    except Exception as e:
-
-        logger.error(
-            "Prediction failed: %s",
-            str(e)
-        )
-
-
-        raise HTTPException(
-
-            status_code=500,
-
-            detail="Model prediction failed"
-
-        )
+    return result
 
 
 # =========================================================

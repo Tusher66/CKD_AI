@@ -13,12 +13,18 @@ from fastapi.security import (
     OAuth2PasswordBearer
 )
 
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
+
+from app.core.database import get_db
 
 from app.core.model_loader import (
     model,
     scaler
 )
+
+from app.models.user import User
 
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -37,9 +43,15 @@ def get_scaler():
 
 
 def get_current_user(
+
     token: str = Depends(
         oauth2_scheme
+    ),
+
+    db: Session = Depends(
+        get_db
     )
+
 ):
 
     credentials_exception = HTTPException(
@@ -80,9 +92,32 @@ def get_current_user(
             raise credentials_exception
 
 
-        return username
-
-
     except JWTError:
 
         raise credentials_exception
+
+
+    user = db.query(
+        User
+    ).filter(
+        User.username == username
+    ).first()
+
+
+    if user is None:
+
+        raise credentials_exception
+
+
+    if not user.is_active:
+
+        raise HTTPException(
+
+            status_code=403,
+
+            detail="User account is inactive"
+
+        )
+
+
+    return user

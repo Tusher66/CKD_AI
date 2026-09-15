@@ -17,6 +17,7 @@ from fastapi.responses import (
 )
 
 from app.core.dependencies import (
+    get_current_admin,
     get_model,
     get_scaler,
     get_current_user
@@ -28,6 +29,16 @@ from app.schemas.patient import (
 
 from app.schemas.response import (
     PredictionResponse
+)
+
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+
+from app.models.user import User
+
+from app.models.prediction import (
+    PredictionHistory
 )
 
 from app.services.prediction_service import (
@@ -50,39 +61,56 @@ router = APIRouter(
 # SINGLE PATIENT PREDICTION
 # =========================================================
 
-@router.post(
-    "/predict",
-    response_model=PredictionResponse
-)
+@router.post("/predict")
 def predict(
-
     patient: Patient,
-
-    model=Depends(
-        get_model
-    ),
-
-    scaler=Depends(
-        get_scaler
-    ),
-
-    current_user=Depends(
-        get_current_user
-    )
-
+    db: Session = Depends(get_db),
+    model=Depends(get_model),
+    scaler=Depends(get_scaler),
+    current_user: User = Depends(get_current_user)
 ):
 
     result = predict_patient(
-
         patient,
-
         model,
-
         scaler
+    )
+
+    prediction_history = PredictionHistory(
+
+        user_id=current_user.id,
+
+        age=patient.Age,
+
+        bp=patient.BP,
+
+        creatinine=patient.Creatinine,
+
+        prediction=result["prediction"],
+
+        probability=result["probability"]
 
     )
 
-    return result
+    db.add(
+        prediction_history
+    )
+
+    db.commit()
+
+    db.refresh(
+        prediction_history
+    )
+
+    return {
+        "message": "Prediction completed successfully",
+
+        "prediction": result["prediction"],
+
+        "probability": result["probability"],
+
+        "prediction_id": prediction_history.id
+    }
 
 
 # =========================================================
@@ -353,3 +381,91 @@ async def predict_csv(
             detail="CSV prediction failed"
 
         )
+
+@router.get("/prediction/history")
+def get_prediction_history(
+
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(
+        get_current_user
+    )
+
+):
+
+    history = db.query(
+        PredictionHistory
+    ).filter(
+        PredictionHistory.user_id
+        == current_user.id
+    ).order_by(
+        PredictionHistory.created_at.desc()
+    ).all()
+
+    return {
+        "count": len(history),
+
+        "data": [
+            {
+                "id": item.id,
+
+                "age": item.age,
+
+                "bp": item.bp,
+
+                "creatinine": item.creatinine,
+
+                "prediction": item.prediction,
+
+                "probability": item.probability,
+
+                "created_at": item.created_at
+
+            }
+
+            for item in history
+        ]
+    }
+
+@router.get("/admin/predictions")
+def get_all_predictions(
+
+    db: Session = Depends(get_db),
+
+    current_admin: User = Depends(
+        get_current_admin
+    )
+
+):
+
+    history = db.query(
+        PredictionHistory
+    ).order_by(
+        PredictionHistory.created_at.desc()
+    ).all()
+
+    return {
+        "count": len(history),
+
+        "data": [
+            {
+                "id": item.id,
+
+                "user_id": item.user_id,
+
+                "age": item.age,
+
+                "bp": item.bp,
+
+                "creatinine": item.creatinine,
+
+                "prediction": item.prediction,
+
+                "probability": item.probability,
+
+                "created_at": item.created_at
+
+            }
+            for item in history
+        ]
+    }

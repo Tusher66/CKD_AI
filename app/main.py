@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.core.database import Base, engine
 
 from app.models.user import User
+from app.models.prediction import PredictionHistory
 
 from app.routes.health import router as health_router
 from app.routes.prediction import router as prediction_router

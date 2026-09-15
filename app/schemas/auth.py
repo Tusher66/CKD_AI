@@ -5,6 +5,7 @@ class RegisterRequest(BaseModel):
     username: str
     email: str
     password: str
+    role: str
 
 
 class TokenResponse(BaseModel):

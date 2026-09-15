@@ -83,7 +83,7 @@ def register(
             request.password
         ),
 
-        role="USER",
+        role=request.role,
 
         is_active=True
 
@@ -106,8 +106,10 @@ def register(
         user.username,
 
         "email":
-        user.email
+        user.email,
 
+        "role":
+        user.role
     }
 
 

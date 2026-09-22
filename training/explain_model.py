@@ -128,16 +128,49 @@ print(
 explainer = shap.TreeExplainer(model)
 
 
+shap_values = explainer.shap_values(X_test_scaled)
+
+# ==========================================
+# 8. SHAP EXPLAINER
+# ==========================================
+
+explainer = shap.TreeExplainer(model)
+
 shap_values = explainer.shap_values(
     X_test_scaled
 )
 
+print("\n========== SHAP INFORMATION ==========")
 
-print("\nSHAP values calculated.")
+print("Type:", type(shap_values))
+
+print("SHAP shape:", shap_values.shape)
 
 
 # ==========================================
-# 9. SHAP SUMMARY PLOT
+# 9. SELECT CKD CLASS
+# ==========================================
+
+# Shape:
+# (200, 3, 2)
+#
+# 200 = samples
+# 3   = features
+# 2   = classes
+#
+# Class 0 = No CKD
+# Class 1 = CKD
+
+shap_values_for_ckd = shap_values[:, :, 1]
+
+print(
+    "CKD SHAP shape:",
+    shap_values_for_ckd.shape
+)
+
+
+# ==========================================
+# 10. SHAP SUMMARY PLOT
 # ==========================================
 
 print("\nGenerating SHAP summary plot...")
@@ -145,7 +178,7 @@ print("\nGenerating SHAP summary plot...")
 
 shap.summary_plot(
 
-    shap_values,
+    shap_values_for_ckd,
 
     X_test_scaled,
 
@@ -153,7 +186,6 @@ shap.summary_plot(
 
     show=False
 )
-
 
 plt.tight_layout()
 

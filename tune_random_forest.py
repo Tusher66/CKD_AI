@@ -1,4 +1,8 @@
+import os
+import joblib
 import pandas as pd
+
+from pathlib import Path
 
 from sklearn.model_selection import (
     train_test_split,
@@ -22,12 +26,22 @@ from sklearn.metrics import (
 
 
 # ==========================================
-# 1. LOAD DATASET
+# 1. PATH CONFIGURATION
+# ==========================================
+BASE_DIR = Path(__file__).resolve().parent
+
+DATASET_PATH = BASE_DIR / "dataset" / "patients.csv"
+MODEL_PATH = BASE_DIR / "model" / "ckd_model.joblib"
+SCALER_PATH = BASE_DIR / "model" / "scaler.joblib"
+
+
+# ==========================================
+# 2. LOAD DATASET
 # ==========================================
 
-df = pd.read_csv("../dataset/patients.csv")
+df = pd.read_csv(DATASET_PATH)
 
-print("========== DATASET ==========")
+print("\n========== DATASET ==========")
 
 print("Total rows:", len(df))
 
@@ -39,7 +53,7 @@ print(df["CKD"].value_counts())
 
 
 # ==========================================
-# 2. FEATURES & TARGET
+# 3. FEATURES & TARGET
 # ==========================================
 
 X = df[
@@ -54,7 +68,7 @@ y = df["CKD"]
 
 
 # ==========================================
-# 3. TRAIN / TEST SPLIT
+# 4. TRAIN / TEST SPLIT
 # ==========================================
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -73,7 +87,7 @@ print("Testing :", X_test.shape)
 
 
 # ==========================================
-# 4. SCALING
+# 5. SCALING
 # ==========================================
 
 scaler = StandardScaler()
@@ -82,9 +96,13 @@ X_train_scaled = scaler.fit_transform(X_train)
 
 X_test_scaled = scaler.transform(X_test)
 
+print("\n========== SCALING ==========")
+
+print("Scaler fitted successfully.")
+
 
 # ==========================================
-# 5. RANDOM FOREST
+# 6. RANDOM FOREST
 # ==========================================
 
 rf = RandomForestClassifier(
@@ -93,7 +111,7 @@ rf = RandomForestClassifier(
 
 
 # ==========================================
-# 6. PARAMETER GRID
+# 7. PARAMETER GRID
 # ==========================================
 
 param_grid = {
@@ -126,7 +144,7 @@ param_grid = {
 
 
 # ==========================================
-# 7. STRATIFIED K-FOLD
+# 8. STRATIFIED K-FOLD
 # ==========================================
 
 cv = StratifiedKFold(
@@ -137,7 +155,7 @@ cv = StratifiedKFold(
 
 
 # ==========================================
-# 8. GRID SEARCH
+# 9. GRID SEARCH
 # ==========================================
 
 grid_search = GridSearchCV(
@@ -157,7 +175,7 @@ grid_search = GridSearchCV(
 
 
 # ==========================================
-# 9. START TUNING
+# 10. START TUNING
 # ==========================================
 
 print("\n======================================")
@@ -165,6 +183,10 @@ print("\n======================================")
 print("Starting Hyperparameter Tuning...")
 
 print("======================================")
+
+print("Total parameter combinations:", 108)
+
+print("Total CV fits:", 540)
 
 
 grid_search.fit(
@@ -174,7 +196,7 @@ grid_search.fit(
 
 
 # ==========================================
-# 10. BEST PARAMETERS
+# 11. BEST PARAMETERS
 # ==========================================
 
 print("\n========== BEST PARAMETERS ==========")
@@ -185,7 +207,7 @@ print(
 
 
 # ==========================================
-# 11. BEST CV SCORE
+# 12. BEST CV SCORE
 # ==========================================
 
 print("\n========== BEST CV SCORE ==========")
@@ -196,7 +218,7 @@ print(
 
 
 # ==========================================
-# 12. BEST MODEL
+# 13. BEST MODEL
 # ==========================================
 
 best_model = grid_search.best_estimator_
@@ -208,7 +230,16 @@ print(best_model)
 
 
 # ==========================================
-# 13. TEST PREDICTION
+# 14. MODEL CLASSES
+# ==========================================
+
+print("\n========== MODEL CLASSES ==========")
+
+print(best_model.classes_)
+
+
+# ==========================================
+# 15. TEST PREDICTION
 # ==========================================
 
 predictions = best_model.predict(
@@ -221,7 +252,7 @@ probabilities = best_model.predict_proba(
 
 
 # ==========================================
-# 14. EVALUATION
+# 16. EVALUATION
 # ==========================================
 
 accuracy = accuracy_score(
@@ -254,7 +285,7 @@ roc_auc = roc_auc_score(
 
 
 # ==========================================
-# 15. PRINT RESULTS
+# 17. FINAL TEST RESULTS
 # ==========================================
 
 print("\n========== FINAL TEST EVALUATION ==========")
@@ -281,21 +312,21 @@ print(
 
 
 # ==========================================
-# 16. CONFUSION MATRIX
+# 18. CONFUSION MATRIX
 # ==========================================
+
+cm = confusion_matrix(
+    y_test,
+    predictions
+)
 
 print("\n========== CONFUSION MATRIX ==========")
 
-print(
-    confusion_matrix(
-        y_test,
-        predictions
-    )
-)
+print(cm)
 
 
 # ==========================================
-# 17. CLASSIFICATION REPORT
+# 19. CLASSIFICATION REPORT
 # ==========================================
 
 print("\n========== CLASSIFICATION REPORT ==========")
@@ -306,4 +337,153 @@ print(
         predictions,
         zero_division=0
     )
+)
+
+
+# ==========================================
+# 20. SAVE MODEL DIRECTORY
+# ==========================================
+
+os.makedirs(
+    "../model",
+    exist_ok=True
+)
+
+
+# ==========================================
+# 21. SAVE BEST MODEL
+# ==========================================
+
+joblib.dump(
+    best_model,
+    MODEL_PATH
+)
+
+
+# ==========================================
+# 22. SAVE SCALER
+# ==========================================
+
+joblib.dump(
+    scaler,
+    SCALER_PATH
+)
+
+
+# ==========================================
+# 23. VERIFY SAVED FILES
+# ==========================================
+
+print("\n========== MODEL SAVING ==========")
+
+print("Model saved to:")
+print(MODEL_PATH)
+
+print("\nScaler saved to:")
+print(SCALER_PATH)
+
+
+# ==========================================
+# 24. VERIFY MODEL LOADING
+# ==========================================
+
+print("\n========== VERIFY SAVED MODEL ==========")
+
+loaded_model = joblib.load(
+    MODEL_PATH
+)
+
+loaded_scaler = joblib.load(
+    SCALER_PATH
+)
+
+
+print("\nLoaded Model:")
+print(loaded_model)
+
+print("\nLoaded Model Classes:")
+print(loaded_model.classes_)
+
+print("\nLoaded Scaler:")
+print(loaded_scaler)
+
+
+# ==========================================
+# 25. VERIFY PREDICTION
+# ==========================================
+
+sample_patient = pd.DataFrame({
+    "Age": [65],
+    "BP": [100],
+    "Creatinine": [2.8]
+})
+
+
+sample_scaled = loaded_scaler.transform(
+    sample_patient
+)
+
+
+sample_prediction = loaded_model.predict(
+    sample_scaled
+)
+
+sample_probability = loaded_model.predict_proba(
+    sample_scaled
+)
+
+
+print("\n========== SAMPLE PATIENT TEST ==========")
+
+print("\nPatient:")
+print(sample_patient)
+
+print("\nPrediction:")
+print(sample_prediction[0])
+
+print("\nProbability:")
+print(sample_probability[0])
+
+print(
+    f"\nNo CKD Probability : "
+    f"{sample_probability[0][0]:.4f}"
+)
+
+print(
+    f"CKD Probability    : "
+    f"{sample_probability[0][1]:.4f}"
+)
+
+
+# ==========================================
+# 26. FINAL MESSAGE
+# ==========================================
+
+print("\n==========================================")
+
+print("Random Forest training completed.")
+
+print("Best model saved successfully.")
+
+print("Scaler saved successfully.")
+
+print("==========================================")
+
+
+sample_patient = pd.DataFrame({
+    "Age": [55],
+    "BP": [150],
+    "Creatinine": [1.1]
+})
+
+sample_scaled = loaded_scaler.transform(
+    sample_patient
+)
+
+sample_prediction = loaded_model.predict(
+    sample_scaled
+)
+
+sample_probability = loaded_model.predict_proba(
+    sample_scaled
 )

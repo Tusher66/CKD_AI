@@ -12,15 +12,16 @@ from fastapi import (
     Depends
 )
 
-from fastapi.responses import (
-    StreamingResponse
-)
-
 from app.core.dependencies import (
     get_current_admin,
     get_model,
     get_scaler,
+    get_explainer,
     get_current_user
+)
+
+from fastapi.responses import (
+    StreamingResponse
 )
 
 from app.schemas.patient import (
@@ -60,20 +61,21 @@ router = APIRouter(
 # =========================================================
 # SINGLE PATIENT PREDICTION
 # =========================================================
-
 @router.post("/predict")
 def predict(
     patient: Patient,
     db: Session = Depends(get_db),
     model=Depends(get_model),
     scaler=Depends(get_scaler),
+    explainer=Depends(get_explainer),
     current_user: User = Depends(get_current_user)
 ):
 
     result = predict_patient(
         patient,
         model,
-        scaler
+        scaler,
+        explainer
     )
 
     prediction_history = PredictionHistory(
@@ -103,13 +105,17 @@ def predict(
     )
 
     return {
+
         "message": "Prediction completed successfully",
 
         "prediction": result["prediction"],
 
         "probability": result["probability"],
 
+        "explanation": result["explanation"],
+
         "prediction_id": prediction_history.id
+
     }
 
 

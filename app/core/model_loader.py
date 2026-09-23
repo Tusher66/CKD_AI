@@ -1,6 +1,6 @@
 from pathlib import Path
-
 import joblib
+import shap
 
 from app.core.config import settings
 
@@ -12,9 +12,15 @@ SCALER_PATH = BASE_DIR / settings.SCALER_PATH
 
 
 model = joblib.load(MODEL_PATH)
-
 scaler = joblib.load(SCALER_PATH)
 
+explainer = shap.TreeExplainer(model)
 
+
+print("================================")
 print("Model loaded successfully")
-print("Scaler loaded successfully")
+print("Model:", model)
+print("Model classes:", model.classes_)
+print("Scaler:", scaler)
+print("SHAP explainer loaded successfully")
+print("================================")
